@@ -47,7 +47,6 @@ class blockchain(object):
             'recepient' : recepient,
             'amount' : amount,
         })
-
         return self.get_last_block['index'] + 1
 
     '''
@@ -78,9 +77,12 @@ class blockchain(object):
         return proof
 
     '''
-    function to validate the proof of work
+    function to validate the proof of work checks if the hash of the guess
+    has 4 leading zeroes (adjust number of zeroes for harder algo)
     :param: <int>last_proof
     :return: <int>proof
     '''
-    def validate_pow(self, last_proof):
-        pass
+    def validate_pow(self, proof, last_proof):
+        guess = f"{proof}{last_proof}".encode()
+        guess_hashd = hashlib.sha256(guess).hexdigest()
+        return guess_hashd[:4] == "0000"
