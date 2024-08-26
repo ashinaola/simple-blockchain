@@ -17,9 +17,23 @@ class blockchain(object):
         # create the genesis block
         self.init_block(prev_hash=1, proof=100)
 
-    # function to initiate a new block and add to chain
+    '''
+    function to initiate a new block and add to chain
+    :param: <string>prev_hash, <int>proof
+    :return: <dict>newly created block
+    '''
     def init_block(self, prev_hash, proof):
-        pass
+        block = ({
+            'index' : len(self.blocks) + 1,
+            'timestamp' : time(),
+            'transactions' : self.transactions,
+            'proof' : proof,
+            'prev_hash' : prev_hash,
+        })
+        #reset the transactions
+        self.transactions = []
+        self.blocks.append(block)
+        return block
 
     '''
     function to create a new transaction and add to chain
@@ -30,7 +44,7 @@ class blockchain(object):
         self.transactions.append({
             'sender' : sender,
             'recepient' : recepient,
-            'amount' : amount
+            'amount' : amount,
         })
 
         return self.get_last_block['index'] + 1
