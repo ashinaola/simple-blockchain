@@ -9,6 +9,7 @@ blocks:
 import hashlib
 import json
 from time import time
+from uuid import uuid4
 
 class blockchain(object):
     def __init__(self):
@@ -49,12 +50,37 @@ class blockchain(object):
 
         return self.get_last_block['index'] + 1
 
-    # hashes a block
+    '''
+    turn block into json which will then be serialized into a hash
+    :param: <dict>block
+    :return: <string>hash
+    '''
     @staticmethod
     def hash(block):
-        pass
+        block_hash = json.dumps(block, key=True)
+        return hashlib.sha256(block_hash).hexdigest()
 
     # returns the last block on the chain
     @property
     def get_last_block(self):
+        return self.blocks[len(self.blocks) - 1]
+
+    '''
+    function to implement proof of work
+    find x s.t. the hash of x produces 4 leading 0s
+    :param: <int>last_proof, 
+    :return: <string>proof
+    '''
+    def proof_of_work(self, last_proof):
+        proof = 0
+        while not self.validate_pow(last_proof):
+            proof += 1
+        return proof
+
+    '''
+    function to validate the proof of work
+    :param: <int>last_proof
+    :return: <int>proof
+    '''
+    def validate_pow(self, last_proof):
         pass
