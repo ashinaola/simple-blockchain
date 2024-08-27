@@ -10,8 +10,11 @@ import hashlib
 import json
 from time import time
 from uuid import uuid4
+from flask import Flask,jsonify
+from pythran.tables import method
 
-class blockchain(object):
+
+class Blockchain(object):
     def __init__(self):
         self.blocks = []
         self.transactions = []
@@ -86,3 +89,32 @@ class blockchain(object):
         guess = f"{proof}{last_proof}".encode()
         guess_hashd = hashlib.sha256(guess).hexdigest()
         return guess_hashd[:4] == "0000"
+
+# initiate node
+app = Flask(__name__)
+
+# generate unique address for the node
+node_id = str(uuid4()).replace('-', '')
+
+# Instantiate the blockchain
+blockchain = Blockchain()
+
+# define functions /transactions/new /mine /chain
+@app.route('/transactions/new', method=['POST'])
+def new_transaction():
+    print('Adding a new transaction..')
+
+@app.route('/mine', method=['GET'])
+def mine():
+    print('mining new block..')
+
+@app.route('/chain', method=['GET'])
+def chain():
+    response = {
+        'chain' : blockchain.blocks,
+        'length' : len(blockchain.blocks)
+    }
+    return jsonify(response), 200
+
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port='80')
