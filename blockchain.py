@@ -45,10 +45,10 @@ class Blockchain(object):
     :param: <string>sender, <string>recepient, <double>amount
     :return: <int>index of block to hold the transaction
     '''
-    def init_trans(self, sender, recepient, amount):
+    def init_trans(self, sender, recipient, amount):
         self.transactions.append({
             'sender' : sender,
-            'recepient' : recepient,
+            'recepient' : recipient,
             'amount' : amount,
         })
         return self.get_last_block['index'] + 1
@@ -118,7 +118,31 @@ def new_transaction():
 
 @app.route('/mine', method=['GET'])
 def mine():
-    print('mining new block..')
+    # run proof of work algo
+    last_block = blockchain.get_last_block()
+    last_proof = last_block['proof']
+    proof = blockchain.proof_of_work(last_proof)
+
+    # award the miner which completes the proof
+    blockchain.init_trans (
+        sender="0",
+        recipient=node_id,
+        amount=1,
+    )
+
+    # add the new block to the chain
+    previous_hash = blockchain.hash(last_block)
+    block = blockchain.init_block(proof, previous_hash)
+
+    # build and return response
+    response = {
+        'message' : "New block added to chain",
+        'index' : block['index'],
+        'transaction' : block['transactions'],
+        'proof' : block['proof'],
+        'previous_hash' : block['previous_hash'],
+    }
+    return jsonify(response), 200
 
 @app.route('/chain', method=['GET'])
 def chain():
