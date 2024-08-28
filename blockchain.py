@@ -10,7 +10,8 @@ import hashlib
 import json
 from time import time
 from uuid import uuid4
-from flask import Flask,jsonify
+from flask import Flask, jsonify, request
+from google.protobuf.internal.test_bad_identifiers_pb2 import message
 from pythran.tables import method
 
 
@@ -75,6 +76,7 @@ class Blockchain(object):
     '''
     def proof_of_work(self, last_proof):
         proof = 0
+
         while not self.validate_pow(last_proof):
             proof += 1
         return proof
@@ -102,7 +104,17 @@ blockchain = Blockchain()
 # define functions /transactions/new /mine /chain
 @app.route('/transactions/new', method=['POST'])
 def new_transaction():
-    print('Adding a new transaction..')
+    values = request.json()
+
+    # Check that the required fields are in the POSTd data
+    required = ['recipient', 'sender', 'amount']
+    if not all(x in values for x in required):
+        return 'Missing values', 400
+
+    # Create a new transaction and return response message
+    index = blockchain.init_trans(values['sender'], values['recipient'], values['amount'])
+    response = {'message' : f'Adding transaction to block {index}'}
+    return response, 201
 
 @app.route('/mine', method=['GET'])
 def mine():
