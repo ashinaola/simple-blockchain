@@ -11,8 +11,6 @@ import json
 from time import time
 from uuid import uuid4
 from flask import Flask, jsonify, request
-from google.protobuf.internal.test_bad_identifiers_pb2 import message
-from pythran.tables import method
 
 
 class Blockchain(object):
@@ -60,13 +58,13 @@ class Blockchain(object):
     '''
     @staticmethod
     def hash(block):
-        block_hash = json.dumps(block, key=True)
+        block_hash = json.dumps(block, sort_keys=True).encode()
         return hashlib.sha256(block_hash).hexdigest()
 
     # returns the last block on the chain
     @property
     def get_last_block(self):
-        return self.blocks[len(self.blocks) - 1]
+        return self.blocks[-1]
 
     '''
     function to implement proof of work
@@ -77,7 +75,7 @@ class Blockchain(object):
     def proof_of_work(self, last_proof):
         proof = 0
 
-        while not self.validate_pow(last_proof):
+        while not self.validate_pow(last_proof, proof):
             proof += 1
         return proof
 
@@ -102,7 +100,7 @@ node_id = str(uuid4()).replace('-', '')
 blockchain = Blockchain()
 
 # define functions /transactions/new /mine /chain
-@app.route('/transactions/new', method=['POST'])
+@app.route('/transactions/new', methods=['POST'])
 def new_transaction():
     values = request.json()
 
@@ -116,10 +114,11 @@ def new_transaction():
     response = {'message' : f'Adding transaction to block {index}'}
     return response, 201
 
-@app.route('/mine', method=['GET'])
+
+@app.route('/mine', methods=['GET'])
 def mine():
     # run proof of work algo
-    last_block = blockchain.get_last_block()
+    last_block = blockchain.get_last_block
     last_proof = last_block['proof']
     proof = blockchain.proof_of_work(last_proof)
 
@@ -140,11 +139,12 @@ def mine():
         'index' : block['index'],
         'transaction' : block['transactions'],
         'proof' : block['proof'],
-        'previous_hash' : block['previous_hash'],
+        'prev_hash' : block['prev_hash'],
     }
     return jsonify(response), 200
 
-@app.route('/chain', method=['GET'])
+
+@app.route('/chain', methods=['GET'])
 def chain():
     response = {
         'chain' : blockchain.blocks,
@@ -153,4 +153,4 @@ def chain():
     return jsonify(response), 200
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port='80')
+    app.run(host='0.0.0.0', port=5000)
