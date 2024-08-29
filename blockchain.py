@@ -102,7 +102,7 @@ blockchain = Blockchain()
 # define functions /transactions/new /mine /chain
 @app.route('/transactions/new', methods=['POST'])
 def new_transaction():
-    values = request.json()
+    values = request.get_json()
 
     # Check that the required fields are in the POSTd data
     required = ['recipient', 'sender', 'amount']
