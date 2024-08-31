@@ -8,6 +8,7 @@ blocks:
 
 import hashlib
 import json
+from urllib import urlparse
 from time import time
 from uuid import uuid4
 from flask import Flask, jsonify, request
@@ -17,8 +18,20 @@ class Blockchain(object):
     def __init__(self):
         self.blocks = []
         self.transactions = []
+
+        # ensures all address on the list is unique
+        self.nodes = set()
+        
         # create the genesis block
         self.init_block(prev_hash=1, proof=100)
+
+    '''
+    Adds a node to list of nodes so it has all nodes on network
+    :param: <str> ip address of node
+    '''
+    def register_node(self, address):
+        url_parsed = urlparse(address)
+        self.nodes.add(url_parsed)
 
     '''
     function to initiate a new block and add to chain
