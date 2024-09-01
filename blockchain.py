@@ -31,7 +31,13 @@ class Blockchain(object):
     '''
     def register_node(self, address):
         url_parsed = urlparse(address)
-        self.nodes.add(url_parsed)
+        
+        if url_parsed.netloc:
+            self.nodes.add(url_parsed.netloc)
+        elif url_parsed.path:
+            self.nodes.add(url_parsed.path)
+        else:
+            raise ValueError('URL invalid')
 
     '''
     function to initiate a new block and add to chain
