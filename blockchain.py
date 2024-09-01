@@ -233,7 +233,7 @@ def chain():
     }
     return jsonify(response), 200
 
-@app.route('nodes/register', methods=['POST'])
+@app.route('/nodes/register', methods=['POST'])
 def register_node():
     values = request.get_json()
     nodes = values.get('nodes')
