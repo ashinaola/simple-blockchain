@@ -227,5 +227,36 @@ def chain():
     }
     return jsonify(response), 200
 
+@app.route('/register/node', methods=['POST'])
+def register_node():
+    values = request.get_json()
+    nodes = values.get('nodes')
+
+    if nodes is None:
+        return "Error: No valid node list", 400
+    
+    response = {
+        'message' : 'Chain replaced',
+        'new_blocks' : blockchain.blocks,
+    }
+    return jsonify(response), 201
+
+@app.route('/resolve/node', methods=['GET'])
+def consensus():
+    changed_block = blockchain.conflict_resolution()
+
+    if changed_block:
+        response = {
+            'message' : 'Block resolved',
+            'chain' : blockchain.blocks,
+        }
+    else:
+        response = {
+            'message' : 'Unchanged chain',
+            'chain' : blockchain.blocks,
+        }
+
+    return jsonify(response), 200
+
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)
