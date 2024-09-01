@@ -8,7 +8,7 @@ blocks:
 
 import hashlib
 import json
-from urllib import urlparse
+from urllib.parse import urlparse
 from time import time
 from uuid import uuid4
 from flask import Flask, jsonify, request
@@ -235,9 +235,12 @@ def register_node():
     if nodes is None:
         return "Error: No valid node list", 400
     
+    for node in nodes:
+        blockchain.register_node(node)
+    
     response = {
         'message' : 'Chain replaced',
-        'new_blocks' : blockchain.blocks,
+        'total_nodes' : list(blockchain.nodes),
     }
     return jsonify(response), 201
 
