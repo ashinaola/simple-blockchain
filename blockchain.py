@@ -120,7 +120,7 @@ class Blockchain(object):
             print(f'current block: {block}')
 
             # check current block's hash is correct
-            if block['previous_hash'] != self.hash(last_block):
+            if block['prev_hash'] != self.hash(last_block):
                 return False
             
             # check if p.o.w is correct
@@ -137,8 +137,33 @@ class Blockchain(object):
     chain on the network
     :return: <bool> true if the chain was replace, false otherwise
     '''
-    def consensus():
+    def conflict_resolution(self):
+        # get neighboring nodes and initiate var for longest chain
+        neighbors = self.nodes
+        new_blocks = None
+
+        # need the longest chain
+        max_chain = len(self.blocks)
+
+        # grab each node on list and compare to length of nodes
+        for node in neighbors:
+            response = request.get(f'{node}/chain')
+
+            if response.status_code == 200:
+                length = response.json()['length']
+                chain = response.json()['chain']
+                
+                if length > max_chain and self.validate_chain(chain):
+                    max_chain = length
+                    new_blocks = chain
+
+        # replace chain with longer chain if found
+        if new_blocks:
+            self.blocks = new_blocks
+            return True
         
+        return False
+
 
 # initiate node
 app = Flask(__name__)
