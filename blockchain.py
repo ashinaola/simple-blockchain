@@ -233,7 +233,7 @@ def chain():
     }
     return jsonify(response), 200
 
-@app.route('/register/node', methods=['POST'])
+@app.route('nodes/register', methods=['POST'])
 def register_node():
     values = request.get_json()
     nodes = values.get('nodes')
@@ -250,7 +250,7 @@ def register_node():
     }
     return jsonify(response), 201
 
-@app.route('/resolve/node', methods=['GET'])
+@app.route('/nodes/resolve', methods=['GET'])
 def consensus():
     changed_block = blockchain.conflict_resolution()
 
