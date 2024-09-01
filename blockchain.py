@@ -153,7 +153,8 @@ class Blockchain(object):
 
         # grab each node on list and compare to length of nodes
         for node in neighbors:
-            response = request.get(f'{node}/chain')
+            print(request.args)
+            response = request.args.get(f'http://{node}/chain')
 
             if response.status_code == 200:
                 length = response.json()['length']
@@ -268,4 +269,11 @@ def consensus():
     return jsonify(response), 200
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000)
+    from argparse import ArgumentParser
+
+    parser = ArgumentParser()
+    parser.add_argument('-p', '--port', default=5000, type=int, help='port for connection')
+    args = parser.parse_args()
+    port = args.port
+
+    app.run(host='0.0.0.0', port=port)
