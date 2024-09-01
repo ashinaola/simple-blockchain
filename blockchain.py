@@ -21,7 +21,7 @@ class Blockchain(object):
 
         # ensures all address on the list is unique
         self.nodes = set()
-        
+
         # create the genesis block
         self.init_block(prev_hash=1, proof=100)
 
@@ -102,6 +102,43 @@ class Blockchain(object):
         guess = f"{proof}{last_proof}".encode()
         guess_hashd = hashlib.sha256(guess).hexdigest()
         return guess_hashd[:4] == "0000"
+    
+    '''
+    Iterates down the chain to validate
+    :param: <list>blocks 
+    :return: <bool>valid chain := true, non-valid chain := false
+    '''
+    def validate_chain(self, blocks):
+        # get last block and set index
+        last_block = blocks[0]
+        index = 1
+
+        # iterate down chain
+        while index < len(blocks):
+            block = blocks[index]            
+            print(f'previous block: {last_block}')
+            print(f'current block: {block}')
+
+            # check current block's hash is correct
+            if block['previous_hash'] != self.hash(last_block):
+                return False
+            
+            # check if p.o.w is correct
+            if not self.validate_pow(last_block['proof'], block['proof']):
+                return False
+            
+            last_block = block
+            index += 1
+
+        return True
+    
+    '''
+    Consensus algorithm which will replace the chain with the longest
+    chain on the network
+    :return: <bool> true if the chain was replace, false otherwise
+    '''
+    def consensus():
+        
 
 # initiate node
 app = Flask(__name__)
