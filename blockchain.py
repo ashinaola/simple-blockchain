@@ -8,6 +8,7 @@ blocks:
 
 import hashlib
 import json
+import requests
 from urllib.parse import urlparse
 from time import time
 from uuid import uuid4
@@ -153,8 +154,7 @@ class Blockchain(object):
 
         # grab each node on list and compare to length of nodes
         for node in neighbors:
-            print(request.args)
-            response = request.args.get(f'http://{node}/chain')
+            response = requests.get(f'http://{node}/chain')
 
             if response.status_code == 200:
                 length = response.json()['length']
