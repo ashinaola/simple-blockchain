@@ -51,7 +51,7 @@ class Blockchain(object):
             'timestamp' : time(),
             'transactions' : self.transactions,
             'proof' : proof,
-            'prev_hash' : prev_hash,
+            'prev_hash' : prev_hash or self.hash(self.blocks[-1]),
         })
         #reset the transactions
         self.transactions = []
@@ -79,7 +79,10 @@ class Blockchain(object):
     @staticmethod
     def hash(block):
         block_hash = json.dumps(block, sort_keys=True).encode()
-        return hashlib.sha256(block_hash).hexdigest()
+        print(f"Block to hash: {block_hash}")
+        hash_result = hashlib.sha256(block_hash).hexdigest()
+        print(f"Hash result: {hash_result}")
+        return hash_result
 
     # returns the last block on the chain
     @property
@@ -92,10 +95,12 @@ class Blockchain(object):
     :param: <int>last_proof, 
     :return: <string>proof
     '''
-    def proof_of_work(self, last_proof):
-        proof = 0
+    def proof_of_work(self, last_block):
+        last_proof = last_block['proof']
+        prev_hash = self.hash(last_block)
 
-        while not self.validate_pow(last_proof, proof):
+        proof = 0
+        while self.validate_pow(last_proof, proof, prev_hash) is False:
             proof += 1
         return proof
 
@@ -105,9 +110,11 @@ class Blockchain(object):
     :param: <int>last_proof
     :return: <int>proof
     '''
-    def validate_pow(self, proof, last_proof):
-        guess = f"{proof}{last_proof}".encode()
+    def validate_pow(self, proof, last_proof, prev_hash):
+        guess = f'{proof}{last_proof}{prev_hash}'.encode()
+        print(f"Guess: {guess}")
         guess_hashd = hashlib.sha256(guess).hexdigest()
+        print(f"Guess hash: {guess_hashd}")
         return guess_hashd[:4] == "0000"
     
     '''
@@ -127,17 +134,21 @@ class Blockchain(object):
             print(f'current block: {block}')
 
             # check current block's hash is correct
-            if block['prev_hash'] != self.hash(last_block):
-                return False
+            # WARNING: look at the if statement
+            last_hash = self.hash(last_block)
+            left = last_block['prev_hash']
+            right = block['prev_hash']
+            if last_block['prev_hash'] != block['prev_hash']:
+                return True
             
             # check if p.o.w is correct
-            if not self.validate_pow(last_block['proof'], block['proof']):
-                return False
+            if self.validate_pow(block['proof'], last_block['proof'], self.hash(last_block)):
+                return True
             
             last_block = block
             index += 1
 
-        return True
+        return False
     
     '''
     Consensus algorithm which will replace the chain with the longest
@@ -202,7 +213,7 @@ def mine():
     # run proof of work algo
     last_block = blockchain.get_last_block
     last_proof = last_block['proof']
-    proof = blockchain.proof_of_work(last_proof)
+    proof = blockchain.proof_of_work(last_block)
 
     # award the miner which completes the proof
     blockchain.init_trans (
@@ -246,7 +257,7 @@ def register_node():
         blockchain.register_node(node)
     
     response = {
-        'message' : 'Chain replaced',
+        'message' : 'Chain registered',
         'total_nodes' : list(blockchain.nodes),
     }
     return jsonify(response), 201
@@ -257,12 +268,12 @@ def consensus():
 
     if changed_block:
         response = {
-            'message' : 'Block resolved',
+            'message' : 'Dispute resolved',
             'chain' : blockchain.blocks,
         }
     else:
         response = {
-            'message' : 'Unchanged chain',
+            'message' : 'Authority preserved',
             'chain' : blockchain.blocks,
         }
 
